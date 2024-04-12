@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FastApi socket io</title>
+    <script
+      type="text/javascript"
+      src="//code.jquery.com/jquery-2.1.4.min.js"
+    ></script>
+  </head>
+
+  <body>
+    <div class="divroot" id="root">SOKCET IO FASTAPI</div>
+    <div>
+      <h1>React Socket.IO Test</h1>
+      <form method="POST" action="#" id="emit" placeholder="message">
+        <input
+          type="text"
+          id="emit_data"
+          name="emit_data"
+          placeholder="Message"
+        />
+        <input
+          type="text"
+          id="emit_room"
+          name="emit_room"
+          placeholder="room"
+        />
+        <input type="submit" value="Enviar" />
+      </form>
+      <h2>Receive:</h2>
+      <div id="log"></div>
+    </div>
+    <script type="module">
+      import { io } from "https://cdn.socket.io/4.7.5/socket.io.esm.min.js";
+      $(document).ready(() => {
+        const socket = io("ws://localhost:8000", {
+          path: "/ws/socket.io/", // Corrección aquí
+          transports: ["websocket"],
+          upgrade: false,
+        });
+        console.log(socket);
+
+        socket.on("connect", () => {
+          // console.log("Connected to server");
+          socket.emit("my_event", { 
+            data: "I'm connected!"});
+        });
+
+        socket.on("disconnect", () => {
+          console.log("Disconnected from server");
+          $("#log").append("<br>Received: " + msg.data);
+        });
+
+        socket.on("my_response", (msg) => {
+          console.log("Received message:", msg);
+          $("#log").append("<br>---Received Server: " + msg.data + " ");
+          $("#log").append(msg.room ? "<br>---room: " + msg.room:null);
+        });
+
+        $("form#emit").submit((event) => {
+          socket.emit("my_event", { data: $("#emit_data").val() });
+          socket.emit("my_broadcast_event", {
+            data: $("#emit_data").val(),
+            room: $("#emit_room").val(),
+          });
+          return false;
+        });
+      });
+    </script>
+  </body>
+</html>
